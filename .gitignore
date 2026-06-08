@@ -8,11 +8,10 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Dados gerados (podem ser regenerados rodando o projeto)
-# Descomente se não quiser commitar os dados coletados:
-# data/dados_nasa_brutos.csv
-# data/dados_mensais.csv
-# graficos/
+# Dados e graficos gerados pelo pipeline (podem ser regenerados rodando main.py)
+data/dados_nasa_*.csv
+data/dados_mensais.csv
+graficos/*.png
 
 # Arquivos do sistema
 .DS_Store

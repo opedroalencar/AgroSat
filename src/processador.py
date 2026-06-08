@@ -103,9 +103,6 @@ def rotular_risco_seca(df_mensal):
 
     df_mensal["risco_seca"] = df_mensal.apply(classificar, axis=1)
 
-    # Versão sem acento para compatibilidade em labels de gráficos
-    df_mensal["risco_display"] = df_mensal["risco_seca"].replace({"Medio": "Medio"})
-
     # Converte para valor numérico para o modelo de ML
     mapa_risco = {"Baixo": 0, "Medio": 1, "Alto": 2}
     df_mensal["risco_numerico"] = df_mensal["risco_seca"].map(mapa_risco)
@@ -158,7 +155,7 @@ def calcular_isa(df_mensal):
     df["isa_categoria"] = df["isa"].apply(_cat_isa)
 
     print("\n  ISA medio por regiao (mes mais recente):")
-    mais_rec = df.sort_values("mes").groupby("regiao").last()
+    mais_rec = df.sort_values(["ano", "mes"]).groupby("regiao").last()
     for regiao, row in mais_rec.iterrows():
         nome = regiao.split(" (")[0] if " (" in regiao else regiao
         print(f"    {nome:<30} ISA={row['isa']:>5.1f}  [{row['isa_categoria']}]")

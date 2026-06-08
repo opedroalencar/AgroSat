@@ -89,8 +89,15 @@ def grafico_heatmap_risco(df_mensal):
     df_plot["regiao_curta"] = df_plot["regiao"].apply(_nome_curto)
     df_plot["risco_num"]    = df_plot["risco_seca"].map(mapa_num)
 
+    anos_unicos = sorted(df_plot["ano"].unique())
+    if len(anos_unicos) > 1:
+        df_plot["linha"] = df_plot["regiao_curta"] + " (" + df_plot["ano"].astype(str) + ")"
+        index_col = "linha"
+    else:
+        index_col = "regiao_curta"
+
     pivot = df_plot.pivot_table(
-        index="regiao_curta", columns="mes",
+        index=index_col, columns="mes",
         values="risco_num", aggfunc="max"
     )
     pivot.columns = [NOMES_MESES[m - 1] for m in pivot.columns]
