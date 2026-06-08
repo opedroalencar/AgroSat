@@ -1,9 +1,9 @@
 # AgroSat — Sistema de Monitoramento de Risco de Seca no Agronegócio Brasileiro
 
 ## Integrantes
-| Nome | RM |
-|------|----|
-| [Seu Nome Aqui] | [Seu RM] |
+João Pedro Ferreira Alencar - rm573473 
+Alisson vinicius de Souza rabelo texeira - rm573512 
+Lucas Michels Kuntz - rm570050 
 
 ---
 
@@ -125,8 +125,7 @@ Na **primeira execução**, o sistema fará requisições à API da NASA (~30 a 
 
 ## Links
 
-- **Repositório GitHub:** [link aqui]
-- **Vídeo de apresentação:** [link aqui]
+- **Repositório GitHub:** https://github.com/opedroalencar/AgroSat
 
 ---
 
