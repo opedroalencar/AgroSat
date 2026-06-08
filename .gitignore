@@ -1,0 +1,20 @@
+# Ambiente virtual Python
+venv/
+env/
+.venv/
+
+# Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Dados gerados (podem ser regenerados rodando o projeto)
+# Descomente se não quiser commitar os dados coletados:
+# data/dados_nasa_brutos.csv
+# data/dados_mensais.csv
+# graficos/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+desktop.ini
