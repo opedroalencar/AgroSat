@@ -1,6 +1,6 @@
 # AgroSat — Sistema de Monitoramento de Risco de Seca no Agronegócio Brasileiro
 
-## Integrantes
+👥 Integrantes do Grupo
 João Pedro Ferreira Alencar - rm573473 
 Alisson vinicius de Souza rabelo texeira - rm573512 
 Lucas Michels Kuntz - rm570050 
