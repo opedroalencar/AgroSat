@@ -209,6 +209,52 @@ with st.sidebar:
         csv_escolhido = _csvs_disponiveis[_idx]["path"]
     else:
         st.caption("Nenhum CSV em /data — será coletado da NASA POWER.")
+
+    # Coleta manual de período arbitrário
+    from datetime import date as _date
+    _ano_atual = _date.today().year
+    with st.expander("➕ Coletar novo período"):
+        st.caption("NASA POWER tem dados de 1981 até ontem. Coleta as 6 regiões.")
+        col_a, col_b = st.columns(2)
+        ano_ini_novo = col_a.number_input(
+            "Ano início", min_value=1981, max_value=_ano_atual,
+            value=_ano_atual - 1, step=1, key="ano_ini_novo",
+        )
+        ano_fim_novo = col_b.number_input(
+            "Ano fim", min_value=1981, max_value=_ano_atual,
+            value=_ano_atual - 1, step=1, key="ano_fim_novo",
+        )
+        sobrescrever = st.checkbox("Sobrescrever se já existir", value=False)
+
+        if st.button("Coletar NASA POWER", use_container_width=True, key="btn_coletar_novo"):
+            if int(ano_fim_novo) < int(ano_ini_novo):
+                st.error("Ano fim deve ser maior ou igual ao ano início.")
+            else:
+                nome_arq = f"dados_nasa_{int(ano_ini_novo)}_{int(ano_fim_novo)}.csv"
+                pasta_data = os.path.join(os.path.dirname(__file__), "data")
+                destino = os.path.join(pasta_data, nome_arq)
+                if os.path.exists(destino) and not sobrescrever:
+                    st.warning(f"{nome_arq} já existe — marque 'sobrescrever' ou selecione no dropdown.")
+                else:
+                    with st.spinner(f"Coletando {int(ano_ini_novo)}–{int(ano_fim_novo)} da NASA POWER (pode levar 1–2 min por ano)..."):
+                        try:
+                            df_novo = coletar_todas_regioes(
+                                ano_inicio=int(ano_ini_novo),
+                                ano_fim=int(ano_fim_novo),
+                                regioes=list(_REGIOES_ESPERADAS),
+                            )
+                        except Exception as e:
+                            df_novo = None
+                            st.error(f"Falha na coleta: {e}")
+                    if df_novo is not None and not df_novo.empty:
+                        os.makedirs(pasta_data, exist_ok=True)
+                        df_novo.to_csv(destino, index=False)
+                        st.cache_data.clear()
+                        st.success(f"✓ {nome_arq} salvo ({len(df_novo)} linhas). Recarregando...")
+                        st.rerun()
+                    elif df_novo is not None:
+                        st.error("Coleta retornou vazia.")
+
     st.markdown("<br>", unsafe_allow_html=True)
 
     st.markdown("#### Regiões Monitoradas")
