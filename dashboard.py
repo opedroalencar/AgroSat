@@ -341,17 +341,19 @@ periodo_str = f"{ano_min}" if ano_min == ano_max else f"{ano_min}–{ano_max}"
 
 isa_class = "warn" if 30 <= isa_med < 55 else ("danger" if isa_med >= 55 else "")
 alto_pct  = (n_alto / n_tot * 100) if n_tot else 0
+# média de meses em Alto por região (escala 0–12 faz sentido com o rótulo "Meses")
+alto_por_regiao = (n_alto / n_reg) if n_reg else 0
 
 isa_sub = "risco elevado" if isa_med >= 55 else ("atenção" if isa_med >= 30 else "condições normais")
 alto_variant = "danger" if alto_pct >= 20 else ("warn" if alto_pct > 0 else "muted")
 
 st.markdown(
     kpi_grid([
-        kpi_card(label="Regiões",          value=f"{n_reg}",         unit="",     sub=f"período {periodo_str}", variant="muted"),
-        kpi_card(label="Chuva / mês",      value=f"{chuva_med:.0f}", unit="mm",   sub="média mensal",            variant=""),
-        kpi_card(label="Temperatura",      value=f"{temp_med:.1f}",  unit="°C",   sub="média do período",        variant="muted"),
-        kpi_card(label="ISA Médio",        value=f"{isa_med:.1f}",   unit="/100", sub=isa_sub,                   variant=isa_class),
-        kpi_card(label="Meses Risco Alto", value=f"{n_alto}",        unit="",     sub=f"{alto_pct:.0f}% do total", variant=alto_variant),
+        kpi_card(label="Regiões",            value=f"{n_reg}",              unit="",     sub=f"período {periodo_str}",                       variant="muted"),
+        kpi_card(label="Chuva / mês",        value=f"{chuva_med:.0f}",      unit="mm",   sub="média mensal",                                 variant=""),
+        kpi_card(label="Temperatura",        value=f"{temp_med:.1f}",       unit="°C",   sub="média do período",                             variant="muted"),
+        kpi_card(label="ISA Médio",          value=f"{isa_med:.1f}",        unit="/100", sub=isa_sub,                                        variant=isa_class),
+        kpi_card(label="Meses Risco Alto",   value=f"{alto_por_regiao:.1f}", unit="/região", sub=f"{n_alto} de {n_tot} ({alto_pct:.0f}%)", variant=alto_variant),
     ]),
     unsafe_allow_html=True,
 )
