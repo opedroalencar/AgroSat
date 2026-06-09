@@ -1,4 +1,4 @@
-"""
+﻿"""
 AgroSat — Dashboard Visual Interativo
 Plataforma web para exploração dos dados climáticos e resultados de ML.
 
@@ -21,6 +21,21 @@ from processador import processar
 from modelo_ml import preparar_dados_ml, treinar_modelo, FEATURES
 from sklearn.metrics import accuracy_score, confusion_matrix
 
+from ui.components import (
+    load_css,
+    sidebar_subtitle,
+    sidebar_info,
+    sidebar_footer,
+    hero,
+    banner_critico,
+    kpi_card,
+    kpi_grid,
+    isa_legend,
+    region_card_isa,
+    region_card_risco,
+    region_card_ml,
+)
+
 # ──────────────────────────────────────────────────────────
 # CONFIGURAÇÃO DA PÁGINA
 # ──────────────────────────────────────────────────────────
@@ -32,128 +47,9 @@ st.set_page_config(
 )
 
 # ──────────────────────────────────────────────────────────
-# CSS — tema satelital escuro, fonte Space Grotesk
+# CSS — tema satelital escuro, fonte Space Grotesk (em ui/styles.css)
 # ──────────────────────────────────────────────────────────
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-
-html, body, [class*="css"] { font-family: 'Space Grotesk', sans-serif; }
-
-.stApp {
-    background: linear-gradient(135deg, #0A0E17 0%, #0D1B2A 60%, #0A1628 100%);
-    color: #E8EDF2;
-}
-
-section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0D1B2A 0%, #111827 100%);
-    border-right: 1px solid rgba(0,196,140,0.15);
-}
-
-[data-testid="metric-container"] {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(0,196,140,0.18);
-    border-radius: 12px;
-    padding: 1rem 1.2rem;
-}
-[data-testid="metric-container"] label {
-    color: #7B92A8 !important;
-    font-size: 0.73rem !important;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-[data-testid="metric-container"] [data-testid="stMetricValue"] {
-    color: #00C48C !important;
-    font-size: 1.75rem !important;
-    font-weight: 700;
-}
-[data-testid="metric-container"] [data-testid="stMetricDelta"] {
-    color: #7B92A8 !important;
-}
-
-.stTabs [data-baseweb="tab-list"] {
-    background: rgba(255,255,255,0.03);
-    border-radius: 10px;
-    padding: 4px;
-    gap: 4px;
-}
-.stTabs [data-baseweb="tab"] {
-    background: transparent;
-    border-radius: 8px;
-    color: #7B92A8;
-    font-weight: 500;
-    border: none;
-}
-.stTabs [aria-selected="true"] {
-    background: rgba(0,196,140,0.15) !important;
-    color: #00C48C !important;
-    border-bottom: 2px solid #00C48C !important;
-}
-
-.stButton > button {
-    background: linear-gradient(135deg, #00C48C, #00966D);
-    color: #fff !important;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    padding: 0.6rem 1.4rem;
-    width: 100%;
-    transition: all 0.2s ease;
-}
-.stButton > button:hover {
-    background: linear-gradient(135deg, #00D99A, #00A878);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 15px rgba(0,196,140,0.35);
-}
-
-.stSelectbox label, .stMultiSelect label {
-    color: #7B92A8 !important;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}
-
-/* Cards de risco */
-.rcard {
-    border-radius: 10px;
-    padding: 0.85rem 1rem;
-    margin: 0.35rem 0;
-    font-weight: 500;
-    font-size: 0.9rem;
-    line-height: 1.6;
-}
-.rc-alto    { background: rgba(255,75,75,0.10);   border-left: 3px solid #FF4B4B; }
-.rc-medio   { background: rgba(255,165,0,0.10);   border-left: 3px solid #FFA500; }
-.rc-baixo   { background: rgba(0,196,140,0.10);   border-left: 3px solid #00C48C; }
-.rc-critico { background: rgba(255,50,50,0.14);   border-left: 4px solid #FF2222; }
-.rc-alerta  { background: rgba(255,120,0,0.12);   border-left: 4px solid #FF7800; }
-.rc-atencao { background: rgba(255,200,0,0.10);   border-left: 4px solid #FFD000; }
-.rc-normal  { background: rgba(0,196,140,0.10);   border-left: 4px solid #00C48C; }
-
-/* Banner de alerta */
-.banner-critico {
-    background: rgba(255,50,50,0.12);
-    border: 1px solid rgba(255,50,50,0.4);
-    border-radius: 10px;
-    padding: 0.9rem 1.2rem;
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-}
-
-/* Título principal */
-.hero-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #00C48C 0%, #00D4FF 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1.15;
-}
-.hero-sub { color: #4A6070; font-size: 0.92rem; letter-spacing: 0.04em; }
-</style>
-""", unsafe_allow_html=True)
+st.markdown(load_css(), unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────
 # PALETAS E CONSTANTES
@@ -192,25 +88,73 @@ def _nome_curto(r):
 # ──────────────────────────────────────────────────────────
 # CACHE
 # ──────────────────────────────────────────────────────────
-@st.cache_data(show_spinner=False)
-def _ler_cache():
-    """Lê o CSV de dados da NASA mais recente disponível em /data."""
-    import glob
+_REGIOES_ESPERADAS = set(REGIOES_AGRICOLAS.keys())
+
+
+def _cache_valido(df):
+    """Cache é válido se contém todas as regiões esperadas e não está vazio."""
+    if df is None or df.empty or "regiao" not in df.columns:
+        return False
+    return _REGIOES_ESPERADAS.issubset(set(df["regiao"].unique()))
+
+
+def _listar_csvs():
+    """Lista todos os dados_nasa_*.csv em /data, ordenados do mais recente
+    pro mais antigo (mtime). Retorna lista de dicts com path/nome/anos/mtime."""
+    import glob, re
     pasta = os.path.join(os.path.dirname(__file__), "data")
     if not os.path.isdir(pasta):
-        return None
-    candidatos = sorted(glob.glob(os.path.join(pasta, "dados_nasa_*.csv")), reverse=True)
-    candidatos.append(os.path.join(pasta, "dados_nasa_brutos.csv"))
-    for caminho in candidatos:
-        if os.path.exists(caminho):
-            return pd.read_csv(caminho, parse_dates=["data"])
+        return []
+    paths = sorted(
+        glob.glob(os.path.join(pasta, "dados_nasa_*.csv")),
+        key=os.path.getmtime,
+        reverse=True,
+    )
+    fallback = os.path.join(pasta, "dados_nasa_brutos.csv")
+    if os.path.exists(fallback) and fallback not in paths:
+        paths.append(fallback)
+    out = []
+    for p in paths:
+        nome = os.path.basename(p)
+        m = re.match(r"dados_nasa_(\d{4})_(\d{4})\.csv", nome)
+        anos = f"{m.group(1)}–{m.group(2)}" if m else "—"
+        out.append({
+            "path": p,
+            "nome": nome,
+            "anos": anos,
+            "mtime": os.path.getmtime(p),
+        })
+    return out
+
+
+@st.cache_data(show_spinner=False)
+def _ler_cache(caminho: str | None = None):
+    """Lê um CSV de cache. Se `caminho` for dado, lê esse arquivo específico
+    (validando as 6 regiões). Se None, cai no auto-discover: pega o CSV
+    mais recente que contenha todas as regiões esperadas."""
+    if caminho:
+        try:
+            df = pd.read_csv(caminho, parse_dates=["data"])
+        except Exception:
+            return None
+        return df if _cache_valido(df) else None
+
+    # auto-discover (comportamento antigo, mantido como fallback)
+    for c in _listar_csvs():
+        try:
+            df = pd.read_csv(c["path"], parse_dates=["data"])
+        except Exception:
+            continue
+        if _cache_valido(df):
+            return df
     return None
 
 
 @st.cache_data(show_spinner=False)
-def _coletar(regioes_tuple, ano_inicio=2024, ano_fim=2024):
+def _coletar_completo(ano_inicio=2024, ano_fim=2024):
+    """Coleta SEMPRE as 6 regiões — nunca subset, pra não corromper o cache."""
     return coletar_todas_regioes(ano_inicio=ano_inicio, ano_fim=ano_fim,
-                                  regioes=list(regioes_tuple))
+                                  regioes=list(_REGIOES_ESPERADAS))
 
 
 @st.cache_data(show_spinner=False)
@@ -233,18 +177,84 @@ def _treinar(df):
 with st.sidebar:
     st.markdown("### 🛰️ AgroSat")
     st.markdown(
-        "<p style='color:#3A5060;font-size:0.78rem;margin-top:-0.4rem;'>"
-        "Monitoramento de Seca via Satélite</p>", unsafe_allow_html=True
+        sidebar_subtitle("Monitoramento de Seca via Satélite"),
+        unsafe_allow_html=True,
     )
     st.divider()
 
     st.markdown(
-        "<div style='background:rgba(0,196,140,0.08);border:1px solid rgba(0,196,140,0.2);"
-        "border-radius:8px;padding:0.6rem 0.9rem;font-size:0.82rem;color:#7B92A8;'>"
-        "📅 <b style='color:#00C48C;'>Ano de referência: 2024</b><br>"
-        "Dados diários de satélite NASA POWER"
-        "</div>", unsafe_allow_html=True
+        sidebar_info(
+            titulo="Fonte: NASA POWER",
+            texto="Dados diários de satélite — período definido pelo CSV escolhido abaixo.",
+        ),
+        unsafe_allow_html=True,
     )
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.markdown("#### Arquivo de dados")
+    _csvs_disponiveis = _listar_csvs()
+    csv_escolhido = None
+    if _csvs_disponiveis:
+        _labels = [
+            f"{c['anos']}  ·  {c['nome']}" if c['anos'] != "—" else c['nome']
+            for c in _csvs_disponiveis
+        ]
+        _idx = st.selectbox(
+            "CSV",
+            options=list(range(len(_csvs_disponiveis))),
+            format_func=lambda i: _labels[i],
+            index=0,
+            label_visibility="collapsed",
+        )
+        csv_escolhido = _csvs_disponiveis[_idx]["path"]
+    else:
+        st.caption("Nenhum CSV em /data — será coletado da NASA POWER.")
+
+    # Coleta manual de período arbitrário
+    from datetime import date as _date
+    _ano_atual = _date.today().year
+    with st.expander("➕ Coletar novo período"):
+        st.caption("NASA POWER tem dados de 1981 até ontem. Coleta as 6 regiões.")
+        col_a, col_b = st.columns(2)
+        ano_ini_novo = col_a.number_input(
+            "Ano início", min_value=1981, max_value=_ano_atual,
+            value=_ano_atual - 1, step=1, key="ano_ini_novo",
+        )
+        ano_fim_novo = col_b.number_input(
+            "Ano fim", min_value=1981, max_value=_ano_atual,
+            value=_ano_atual - 1, step=1, key="ano_fim_novo",
+        )
+        sobrescrever = st.checkbox("Sobrescrever se já existir", value=False)
+
+        if st.button("Coletar NASA POWER", use_container_width=True, key="btn_coletar_novo"):
+            if int(ano_fim_novo) < int(ano_ini_novo):
+                st.error("Ano fim deve ser maior ou igual ao ano início.")
+            else:
+                nome_arq = f"dados_nasa_{int(ano_ini_novo)}_{int(ano_fim_novo)}.csv"
+                pasta_data = os.path.join(os.path.dirname(__file__), "data")
+                destino = os.path.join(pasta_data, nome_arq)
+                if os.path.exists(destino) and not sobrescrever:
+                    st.warning(f"{nome_arq} já existe — marque 'sobrescrever' ou selecione no dropdown.")
+                else:
+                    with st.spinner(f"Coletando {int(ano_ini_novo)}–{int(ano_fim_novo)} da NASA POWER (pode levar 1–2 min por ano)..."):
+                        try:
+                            df_novo = coletar_todas_regioes(
+                                ano_inicio=int(ano_ini_novo),
+                                ano_fim=int(ano_fim_novo),
+                                regioes=list(_REGIOES_ESPERADAS),
+                            )
+                        except Exception as e:
+                            df_novo = None
+                            st.error(f"Falha na coleta: {e}")
+                    if df_novo is not None and not df_novo.empty:
+                        os.makedirs(pasta_data, exist_ok=True)
+                        df_novo.to_csv(destino, index=False)
+                        st.cache_data.clear()
+                        st.success(f"✓ {nome_arq} salvo ({len(df_novo)} linhas). Recarregando...")
+                        st.rerun()
+                    elif df_novo is not None:
+                        st.error("Coleta retornou vazia.")
+
     st.markdown("<br>", unsafe_allow_html=True)
 
     st.markdown("#### Regiões Monitoradas")
@@ -255,55 +265,47 @@ with st.sidebar:
     if not regioes_sel:
         regioes_sel = todas
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    coletar_btn = st.button("⬇  Coletar / Atualizar Dados", use_container_width=True)
-
     st.divider()
     st.markdown(
-        "<div style='color:#2A4050;font-size:0.72rem;line-height:1.7;'>"
-        "Fonte: <a href='https://power.larc.nasa.gov/' target='_blank' "
-        "style='color:#00C48C;text-decoration:none;'>NASA POWER API</a><br>"
-        "FIAP — Global Solution 2026.1"
-        "</div>", unsafe_allow_html=True
+        sidebar_footer(
+            href="https://power.larc.nasa.gov/",
+            link_label="NASA POWER API",
+            linha2="FIAP — Global Solution 2026.1",
+        ),
+        unsafe_allow_html=True,
     )
 
 # ──────────────────────────────────────────────────────────
 # CABEÇALHO
 # ──────────────────────────────────────────────────────────
 st.markdown(
-    "<div class='hero-title'>AgroSat</div>"
-    "<div class='hero-sub'>Monitoramento de Risco de Seca &nbsp;·&nbsp;"
-    " Regiões Agrícolas Brasileiras &nbsp;·&nbsp; Satélite NASA</div>",
-    unsafe_allow_html=True
+    hero(
+        title="AgroSat",
+        subtitle="Monitoramento de Risco de Seca &nbsp;·&nbsp; Regiões Agrícolas Brasileiras &nbsp;·&nbsp; Satélite NASA",
+        pill="● ao vivo · NASA POWER",
+    ),
+    unsafe_allow_html=True,
 )
-st.markdown("<br>", unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────
-# COLETA / CARREGAMENTO
+# COLETA / CARREGAMENTO  (invalidação automática)
 # ──────────────────────────────────────────────────────────
-df_bruto = None
+df_bruto = _ler_cache(csv_escolhido)
 
-if coletar_btn:
-    st.cache_data.clear()
-    st.cache_resource.clear()
+if df_bruto is None:
+    st.info("Nenhum cache válido encontrado. Coletando dados da NASA POWER (todas as 6 regiões)...")
     with st.spinner("Coletando dados da NASA POWER API... (30–60s na 1ª vez)"):
-        df_bruto = _coletar(tuple(regioes_sel))
-    if df_bruto is not None and not df_bruto.empty:
-        pasta = os.path.join(os.path.dirname(__file__), "data")
-        os.makedirs(pasta, exist_ok=True)
-        df_bruto.to_csv(os.path.join(pasta, "dados_nasa_2024_2024.csv"), index=False)
-        st.success(f"Dados coletados! {len(df_bruto)} registros diários.")
-    else:
-        st.error("Não foi possível coletar dados. Verifique a conexão.")
+        df_bruto = _coletar_completo()
+    if df_bruto is None or df_bruto.empty:
+        st.error("Não foi possível coletar dados. Verifique a conexão com a internet.")
         st.stop()
-else:
-    df_bruto = _ler_cache()
-    if df_bruto is None:
-        st.info(
-            "👈  Clique em **Coletar / Atualizar Dados** na barra lateral para iniciar.",
-            icon="ℹ️",
-        )
-        st.stop()
+    pasta = os.path.join(os.path.dirname(__file__), "data")
+    os.makedirs(pasta, exist_ok=True)
+    ano_min = int(pd.to_datetime(df_bruto["data"]).dt.year.min())
+    ano_max = int(pd.to_datetime(df_bruto["data"]).dt.year.max())
+    nome = f"dados_nasa_{ano_min}_{ano_max}.csv"
+    df_bruto.to_csv(os.path.join(pasta, nome), index=False)
+    st.success(f"Coleta concluída ({len(df_bruto)} registros, {ano_min}–{ano_max}).")
 
 # Filtra regiões selecionadas
 df_bruto = df_bruto[df_bruto["regiao"].isin(regioes_sel)]
@@ -319,12 +321,7 @@ criticos  = mais_rec[mais_rec["isa_categoria"].isin(["Critico", "Alerta"])]
 
 if not criticos.empty:
     nomes_alert = ", ".join(criticos["regiao"].apply(_nome_curto).tolist())
-    st.markdown(
-        f"<div class='banner-critico'>🚨 <b>Atenção:</b> "
-        f"<b>{nomes_alert}</b> apresentam ISA elevado no mês mais recente — "
-        f"risco de déficit hídrico severo.</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown(banner_critico(nomes=nomes_alert), unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────
 # KPI CARDS
@@ -334,36 +331,50 @@ n_alto  = (df_mensal["risco_seca"] == "Alto").sum()
 n_medio = (df_mensal["risco_seca"] == "Medio").sum()
 n_baixo = (df_mensal["risco_seca"] == "Baixo").sum()
 isa_med = df_mensal["isa"].mean()
+chuva_med = df_mensal["precipitacao_total_mm"].mean()
+temp_med  = df_mensal["temperatura_media_c"].mean()
+n_reg     = df_mensal["regiao"].nunique()
 
-c1, c2, c3, c4, c5 = st.columns(5)
-c1.metric("Regiões",           df_mensal["regiao"].nunique())
-c2.metric("Chuva Média/mês",   f"{df_mensal['precipitacao_total_mm'].mean():.0f} mm")
-c3.metric("Temp. Média",        f"{df_mensal['temperatura_media_c'].mean():.1f} °C")
-c4.metric("ISA Médio (0–100)", f"{isa_med:.1f}",
-          delta="↑ risco alto" if isa_med > 55 else "condições moderadas",
-          delta_color="inverse" if isa_med > 55 else "off")
-c5.metric("Meses Risco Alto",  str(n_alto),
-          delta=f"{n_alto/n_tot*100:.0f}% do período", delta_color="inverse")
+ano_min = int(df_mensal["ano"].min())
+ano_max = int(df_mensal["ano"].max())
+periodo_str = f"{ano_min}" if ano_min == ano_max else f"{ano_min}–{ano_max}"
 
-st.markdown("<br>", unsafe_allow_html=True)
+isa_class = "warn" if 30 <= isa_med < 55 else ("danger" if isa_med >= 55 else "")
+alto_pct  = (n_alto / n_tot * 100) if n_tot else 0
+# média de meses em Alto por região (escala 0–12 faz sentido com o rótulo "Meses")
+alto_por_regiao = (n_alto / n_reg) if n_reg else 0
+
+isa_sub = "risco elevado" if isa_med >= 55 else ("atenção" if isa_med >= 30 else "condições normais")
+alto_variant = "danger" if alto_pct >= 20 else ("warn" if alto_pct > 0 else "muted")
+
+st.markdown(
+    kpi_grid([
+        kpi_card(label="Regiões",            value=f"{n_reg}",              unit="",     sub=f"período {periodo_str}",                       variant="muted"),
+        kpi_card(label="Chuva / mês",        value=f"{chuva_med:.0f}",      unit="mm",   sub="média mensal",                                 variant=""),
+        kpi_card(label="Temperatura",        value=f"{temp_med:.1f}",       unit="°C",   sub="média do período",                             variant="muted"),
+        kpi_card(label="ISA Médio",          value=f"{isa_med:.1f}",        unit="/100", sub=isa_sub,                                        variant=isa_class),
+        kpi_card(label="Meses Risco Alto",   value=f"{alto_por_regiao:.1f}", unit="/região", sub=f"{n_alto} de {n_tot} ({alto_pct:.0f}%)", variant=alto_variant),
+    ]),
+    unsafe_allow_html=True,
+)
 
 # ──────────────────────────────────────────────────────────
 # ABAS
 # ──────────────────────────────────────────────────────────
 tab_prec, tab_isa, tab_risco, tab_dist, tab_corr, tab_ml, tab_raw = st.tabs([
-    "🌧 Precipitação",
-    "📡 Índice ISA",
-    "🗺 Mapa de Risco",
-    "📊 Distribuição",
-    "🌡 Correlações",
-    "🤖 Machine Learning",
-    "🗃 Dados Brutos",
+    "Precipitação",
+    "Índice ISA",
+    "Mapa de Risco",
+    "Distribuição",
+    "Correlações",
+    "Machine Learning",
+    "Dados Brutos",
 ])
 
 
 # ── TAB 1 — Precipitação ──────────────────────────────────
 with tab_prec:
-    st.markdown("#### Precipitação Mensal por Região (2024)")
+    st.markdown(f"#### Precipitação Mensal por Região · {periodo_str}")
     st.caption("Chuva acumulada em mm/mês. Linhas de referência: 100mm (seguro) e 50mm (crítico).")
 
     fig = go.Figure()
@@ -406,23 +417,14 @@ with tab_isa:
         "Quanto maior o ISA, maior o risco de déficit hídrico para as lavouras."
     )
 
-    # Faixas explicativas
-    col_leg = st.columns(4)
-    for col, (cat, cor, faixa) in zip(col_leg, [
-        ("Normal",  "#00C48C", "0–29"),
-        ("Atenção",  "#FFD000", "30–54"),
+    # Faixas explicativas — grid responsivo
+    itens_leg = [
+        ("Normal",  "#00D99A", "0–29"),
+        ("Atenção", "#FFD000", "30–54"),
         ("Alerta",  "#FF7800", "55–74"),
         ("Crítico", "#FF2222", "75–100"),
-    ]):
-        col.markdown(
-            f"<div style='background:rgba(255,255,255,0.04);border-left:3px solid {cor};"
-            f"border-radius:6px;padding:0.5rem 0.8rem;font-size:0.82rem;'>"
-            f"<b style='color:{cor};'>{cat}</b><br>"
-            f"<span style='color:#7B92A8;font-size:0.75rem;'>ISA {faixa}</span></div>",
-            unsafe_allow_html=True
-        )
-
-    st.markdown("<br>", unsafe_allow_html=True)
+    ]
+    st.markdown(isa_legend(itens_leg), unsafe_allow_html=True)
 
     # Gauge charts por região (mês mais recente)
     n_regioes = len(mais_rec)
@@ -466,10 +468,13 @@ with tab_isa:
 
         css_cat = {"Normal":"rc-normal","Atencao":"rc-atencao","Alerta":"rc-alerta","Critico":"rc-critico"}.get(cat,"")
         col.markdown(
-            f"<div class='rcard {css_cat}'>"
-            f"<b style='color:{cor_g};'>{cat}</b> · {row['precipitacao_total_mm']:.0f} mm "
-            f"· {int(row['dias_secos'])} dias secos · {row['temperatura_media_c']:.1f}°C"
-            f"</div>", unsafe_allow_html=True
+            region_card_isa(
+                cat=cat, cor=cor_g, css_cat=css_cat,
+                chuva_mm=f"{row['precipitacao_total_mm']:.0f}",
+                dias_secos=str(int(row['dias_secos'])),
+                temp_c=f"{row['temperatura_media_c']:.1f}",
+            ),
+            unsafe_allow_html=True,
         )
 
     st.markdown("---")
@@ -561,18 +566,19 @@ with tab_risco:
         css   = {"Baixo":"rc-baixo","Medio":"rc-medio","Alto":"rc-alto"}.get(nivel,"")
         nome  = _nome_curto(row["regiao"])
         cols_d[i % 3].markdown(
-            f"<div class='rcard {css}'>{icon} <b>{nome}</b> — Risco {nivel}<br>"
-            f"<span style='color:#7B92A8;font-size:0.82rem;'>"
-            f"Chuva: {row['precipitacao_total_mm']:.0f}mm &nbsp;·&nbsp;"
-            f"Temp: {row['temperatura_media_c']:.1f}°C &nbsp;·&nbsp;"
-            f"Dias secos: {int(row['dias_secos'])}</span></div>",
+            region_card_risco(
+                icon=icon, nome=nome, nivel=nivel, css=css,
+                chuva_mm=f"{row['precipitacao_total_mm']:.0f}",
+                temp_c=f"{row['temperatura_media_c']:.1f}",
+                dias_secos=str(int(row['dias_secos'])),
+            ),
             unsafe_allow_html=True,
         )
 
 
 # ── TAB 4 — Distribuição ─────────────────────────────────
 with tab_dist:
-    st.markdown("#### Distribuição de Risco por Região (2024)")
+    st.markdown(f"#### Distribuição de Risco por Região · {periodo_str}")
 
     df_d = df_mensal.copy()
     df_d["rc"] = df_d["regiao"].apply(_nome_curto)
@@ -726,14 +732,16 @@ with tab_ml:
             css   = {"Baixo":"rc-baixo","Medio":"rc-medio","Alto":"rc-alto"}.get(pred_label,"")
             icon  = {"Baixo":"✅","Medio":"⚠️","Alto":"🚨"}.get(pred_label,"❓")
             st.markdown(
-                f"<div class='rcard {css}'>{icon} <b>{nome}</b> — Risco <b>{pred_label}</b> "
-                f"<span style='color:#7B92A8;font-size:0.82rem;'>({confianca:.0f}% confiança)</span><br>"
-                f"<span style='color:#7B92A8;font-size:0.82rem;'>"
-                f"Chuva: {row['precipitacao_total_mm']:.0f}mm &nbsp;·&nbsp;"
-                f"ISA: {row['isa']:.1f} [{row['isa_categoria']}] &nbsp;·&nbsp;"
-                f"Dias secos: {int(row['dias_secos'])} ({row['pct_dias_secos']:.0f}%)"
-                f"</span></div>",
-                unsafe_allow_html=True
+                region_card_ml(
+                    icon=icon, nome=nome, pred_label=pred_label, css=css,
+                    confianca=f"{confianca:.0f}",
+                    chuva_mm=f"{row['precipitacao_total_mm']:.0f}",
+                    isa=f"{row['isa']:.1f}",
+                    isa_cat=row['isa_categoria'],
+                    dias_secos=str(int(row['dias_secos'])),
+                    pct_secos=f"{row['pct_dias_secos']:.0f}",
+                ),
+                unsafe_allow_html=True,
             )
 
 
@@ -771,4 +779,5 @@ with tab_raw:
 
     csv = exib_filtrado.to_csv(index=False).encode("utf-8")
     st.download_button("⬇ Baixar CSV", data=csv,
-                       file_name="agrosat_2024.csv", mime="text/csv")
+                       file_name=f"agrosat_{periodo_str.replace('–','_')}.csv",
+                       mime="text/csv")
