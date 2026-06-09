@@ -155,7 +155,7 @@ def prever_risco_atual(modelo, encoder, df_mensal):
     """
     print("\n=== Diagnostico de Risco Atual (mes mais recente) ===\n")
 
-    mais_recente = df_mensal.sort_values("mes").groupby("regiao").last().reset_index()
+    mais_recente = df_mensal.sort_values(["ano", "mes"]).groupby("regiao").last().reset_index()
 
     for _, row in mais_recente.iterrows():
         features_row = pd.DataFrame([row[FEATURES]])

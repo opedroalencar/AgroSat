@@ -43,13 +43,22 @@ def selecionar_periodo():
     """
     args = sys.argv[1:]
 
+    def _validar(ano_i, ano_f):
+        if ano_i > ano_f:
+            print(f"Periodo invalido (ano_inicio > ano_fim). Usando 2024.")
+            return 2024, 2024
+        if ano_i < ANO_MINIMO or ano_f > ANO_MAXIMO:
+            print(f"Ano fora do intervalo ({ANO_MINIMO}-{ANO_MAXIMO}). Usando 2024.")
+            return 2024, 2024
+        return ano_i, ano_f
+
     # Modo linha de comando: python main.py 2022  ou  python main.py 2021 2023
     if len(args) == 1 and args[0].isdigit():
         ano = int(args[0])
-        return ano, ano
+        return _validar(ano, ano)
 
     if len(args) == 2 and args[0].isdigit() and args[1].isdigit():
-        return int(args[0]), int(args[1])
+        return _validar(int(args[0]), int(args[1]))
 
     # Modo interativo: pergunta ao usuário
     print(f"\nQual ano deseja analisar? ({ANO_MINIMO}-{ANO_MAXIMO})")
@@ -151,7 +160,7 @@ def main():
 
     # Exibe ISA no terminal
     print("\n=== ISA — Indice de Seca AgroSat (mes mais recente) ===")
-    mais_rec = df_mensal.sort_values("mes").groupby("regiao").last().reset_index()
+    mais_rec = df_mensal.sort_values(["ano", "mes"]).groupby("regiao").last().reset_index()
     for _, row in mais_rec.iterrows():
         nome = row["regiao"].split(" (")[0] if " (" in row["regiao"] else row["regiao"]
         barra = "#" * int(row["isa"] / 5)

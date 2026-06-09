@@ -194,31 +194,34 @@ def _nome_curto(r):
 # ──────────────────────────────────────────────────────────
 @st.cache_data(show_spinner=False)
 def _ler_cache():
-    """Lê o CSV de dados da NASA (2024) se existir."""
+    """Lê o CSV de dados da NASA mais recente disponível em /data."""
+    import glob
     pasta = os.path.join(os.path.dirname(__file__), "data")
-    for nome in ["dados_nasa_2024_2024.csv", "dados_nasa_brutos.csv"]:
-        caminho = os.path.join(pasta, nome)
+    if not os.path.isdir(pasta):
+        return None
+    candidatos = sorted(glob.glob(os.path.join(pasta, "dados_nasa_*.csv")), reverse=True)
+    candidatos.append(os.path.join(pasta, "dados_nasa_brutos.csv"))
+    for caminho in candidatos:
         if os.path.exists(caminho):
             return pd.read_csv(caminho, parse_dates=["data"])
     return None
 
 
 @st.cache_data(show_spinner=False)
-def _coletar(regioes_tuple):
-    return coletar_todas_regioes(ano_inicio=2024, ano_fim=2024,
+def _coletar(regioes_tuple, ano_inicio=2024, ano_fim=2024):
+    return coletar_todas_regioes(ano_inicio=ano_inicio, ano_fim=ano_fim,
                                   regioes=list(regioes_tuple))
 
 
 @st.cache_data(show_spinner=False)
-def _processar(df_json):
-    df = pd.read_json(df_json)
+def _processar(df):
+    df = df.copy()
     df["data"] = pd.to_datetime(df["data"])
     return processar(df)
 
 
 @st.cache_resource(show_spinner=False)
-def _treinar(df_json):
-    df = pd.read_json(df_json)
+def _treinar(df):
     X_tr, X_te, y_tr, y_te, enc = preparar_dados_ml(df)
     modelo = treinar_modelo(X_tr, y_tr)
     return modelo, enc, X_tr, X_te, y_tr, y_te
@@ -246,7 +249,7 @@ with st.sidebar:
 
     st.markdown("#### Regiões Monitoradas")
     todas = list(REGIOES_AGRICOLAS.keys())
-    regioes_sel = st.multiselect("", todas, default=todas,
+    regioes_sel = st.multiselect("Regiões", todas, default=todas,
                                   label_visibility="collapsed",
                                   format_func=_nome_curto)
     if not regioes_sel:
@@ -306,12 +309,12 @@ else:
 df_bruto = df_bruto[df_bruto["regiao"].isin(regioes_sel)]
 
 with st.spinner("Processando dados..."):
-    df_mensal, _ = _processar(df_bruto.to_json())
+    df_mensal, _ = _processar(df_bruto)
 
 # ──────────────────────────────────────────────────────────
 # BANNER DE ALERTAS (ISA Crítico ou Alerta)
 # ──────────────────────────────────────────────────────────
-mais_rec = df_mensal.sort_values("mes").groupby("regiao").last().reset_index()
+mais_rec = df_mensal.sort_values(["ano", "mes"]).groupby("regiao").last().reset_index()
 criticos  = mais_rec[mais_rec["isa_categoria"].isin(["Critico", "Alerta"])]
 
 if not criticos.empty:
@@ -513,6 +516,10 @@ with tab_risco:
     df_h["rc"]  = df_h["regiao"].apply(_nome_curto)
     df_h["rn"]  = df_h["risco_seca"].map(mapa_num)
 
+    anos_unicos = sorted(df_h["ano"].unique())
+    if len(anos_unicos) > 1:
+        df_h["rc"] = df_h["rc"] + " (" + df_h["ano"].astype(str) + ")"
+
     pivot = df_h.pivot_table(index="rc", columns="mes", values="rn", aggfunc="max")
     for m in range(1, 13):
         if m not in pivot.columns:
@@ -656,7 +663,7 @@ with tab_ml:
         st.warning("Poucos dados para treinar o modelo.")
     else:
         with st.spinner("Treinando Random Forest..."):
-            modelo, enc, X_tr, X_te, y_tr, y_te = _treinar(df_mensal.to_json())
+            modelo, enc, X_tr, X_te, y_tr, y_te = _treinar(df_mensal)
 
         y_pred  = modelo.predict(X_te)
         acc_tr  = accuracy_score(y_tr, modelo.predict(X_tr))
